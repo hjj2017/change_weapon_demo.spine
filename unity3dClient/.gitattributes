@@ -1,0 +1,5 @@
+*.asset text eol=lf
+*.cs    text eol=lf
+*.mat   text eol=lf
+*.meta  text eol=lf
+*.unity text eol=lf
