@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -38,7 +38,7 @@ namespace Spine.Unity {
 	/// </summary>
 	[RequireComponent(typeof(Rigidbody2D))]
 	public class FollowLocationRigidbody2D : MonoBehaviour {
-	
+
 		public Transform reference;
 		public bool followFlippedX;
 		Rigidbody2D ownRigidbody;
@@ -50,8 +50,7 @@ namespace Spine.Unity {
 		void FixedUpdate () {
 			if (followFlippedX) {
 				ownRigidbody.rotation = ((-reference.rotation.eulerAngles.z + 270f) % 360f) - 90f;
-			}
-			else
+			} else
 				ownRigidbody.rotation = reference.rotation.eulerAngles.z;
 			ownRigidbody.position = reference.position;
 		}

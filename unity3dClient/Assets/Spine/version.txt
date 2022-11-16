@@ -1,2 +1,2 @@
-This Spine-Unity runtime works with data exported from Spine Editor version: 4.0.xx
-Package version: spine-unity-4.0-2021-08-16.unitypackage
+This Spine-Unity runtime works with data exported from Spine Editor version: 4.1.xx
+Package version: spine-unity-4.1-2022-11-03.unitypackage

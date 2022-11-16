@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,8 +29,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Spine.Unity.Editor {
 
@@ -107,11 +107,9 @@ namespace Spine.Unity.Editor {
 				using (new SpineInspectorUtility.BoxScope()) {
 					if (spriteAtlasAsset == null) {
 						EditorGUILayout.LabelField(SpineInspectorUtility.TempContent("Please assign SpriteAtlas file.", Icons.warning), GUILayout.Height(46));
-					}
-					else if (spineSpriteAtlasAsset == null || spineSpriteAtlasAsset.RegionsNeedLoading) {
+					} else if (spineSpriteAtlasAsset == null || spineSpriteAtlasAsset.RegionsNeedLoading) {
 						EditorGUILayout.LabelField(SpineInspectorUtility.TempContent("Please hit 'Load regions ..' to load\nregion info. Play mode is started\nand stopped automatically.", Icons.warning), GUILayout.Height(54));
-					}
-					else {
+					} else {
 						EditorGUILayout.LabelField(SpineInspectorUtility.TempContent("SpriteAtlas imported\nsuccessfully.", Icons.spine), GUILayout.Height(46));
 					}
 				}

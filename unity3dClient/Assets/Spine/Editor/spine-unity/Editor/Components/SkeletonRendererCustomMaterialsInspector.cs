@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,13 +31,13 @@
 
 // Contributed by: Lost Polygon
 
+using Spine.Unity.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using Spine.Unity.Examples;
 
 namespace Spine.Unity.Editor {
 
@@ -137,9 +137,9 @@ namespace Spine.Unity.Editor {
 
 			if (SpineInspectorUtility.LargeCenteredButton(SpineInspectorUtility.TempContent("Clear and Reapply Changes", tooltip: "Removes all non-serialized overrides in the SkeletonRenderer and reapplies the overrides on this component."))) {
 				if (skeletonRenderer != null) {
-					#if SPINE_OPTIONAL_MATERIALOVERRIDE
+#if SPINE_OPTIONAL_MATERIALOVERRIDE
 					skeletonRenderer.CustomMaterialOverride.Clear();
-					#endif
+#endif
 					skeletonRenderer.CustomSlotMaterials.Clear();
 					RemoveCustomMaterials();
 					SetCustomMaterials();

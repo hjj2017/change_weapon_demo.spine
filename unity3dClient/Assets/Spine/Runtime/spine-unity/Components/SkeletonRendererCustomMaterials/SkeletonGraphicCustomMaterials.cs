@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -36,11 +36,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spine.Unity {
-	#if NEW_PREFAB_SYSTEM
+#if NEW_PREFAB_SYSTEM
 	[ExecuteAlways]
-	#else
+#else
 	[ExecuteInEditMode]
-	#endif
+#endif
 	[HelpURL("http://esotericsoftware.com/spine-unity#SkeletonGraphicCustomMaterials")]
 	public class SkeletonGraphicCustomMaterials : MonoBehaviour {
 
@@ -49,7 +49,7 @@ namespace Spine.Unity {
 		[SerializeField] protected List<AtlasMaterialOverride> customMaterialOverrides = new List<AtlasMaterialOverride>();
 		[SerializeField] protected List<AtlasTextureOverride> customTextureOverrides = new List<AtlasTextureOverride>();
 
-		#if UNITY_EDITOR
+#if UNITY_EDITOR
 		void Reset () {
 			skeletonGraphic = GetComponent<SkeletonGraphic>();
 
@@ -89,7 +89,7 @@ namespace Spine.Unity {
 				customTextureOverrides = initialAtlasTextureOverrides;
 			}
 		}
-		#endif
+#endif
 		#endregion
 
 		void SetCustomMaterialOverrides () {

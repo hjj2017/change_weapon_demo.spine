@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,16 +31,16 @@
 #define NEW_PREFAB_SYSTEM
 #endif
 
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Spine.Unity {
 
-	#if NEW_PREFAB_SYSTEM
+#if NEW_PREFAB_SYSTEM
 	[ExecuteAlways]
-	#else
+#else
 	[ExecuteInEditMode]
-	#endif
+#endif
 	[HelpURL("http://esotericsoftware.com/spine-unity#BoundingBoxFollowerGraphic")]
 	public class BoundingBoxFollowerGraphic : MonoBehaviour {
 		internal static bool DebugMessages = true;
@@ -49,7 +49,7 @@ namespace Spine.Unity {
 		public SkeletonGraphic skeletonGraphic;
 		[SpineSlot(dataField: "skeletonGraphic", containsBoundingBoxes: true)]
 		public string slotName;
-		public bool isTrigger;
+		public bool isTrigger, usedByEffector, usedByComposite;
 		public bool clearStateOnDisable = true;
 		#endregion
 
@@ -97,13 +97,10 @@ namespace Spine.Unity {
 				return;
 
 			// Don't reinitialize if the setup did not change.
-			if (!overwrite
-				&&
-				colliderTable.Count > 0 && slot != null			// Slot is set and colliders already populated.
-				&&
-				skeletonGraphic.Skeleton == slot.Skeleton		// Skeleton object did not change.
-				&&
-				slotName == slot.data.name						// Slot object did not change.
+			if (!overwrite &&
+				colliderTable.Count > 0 && slot != null &&   // Slot is set and colliders already populated.
+				skeletonGraphic.Skeleton == slot.Skeleton && // Skeleton object did not change.
+				slotName == slot.Data.Name                   // Slot object did not change.
 			)
 				return;
 
@@ -118,13 +115,12 @@ namespace Spine.Unity {
 			if (skeleton == null)
 				return;
 			slot = skeleton.FindSlot(slotName);
-			int slotIndex = skeleton.FindSlotIndex(slotName);
-
 			if (slot == null) {
 				if (BoundingBoxFollowerGraphic.DebugMessages)
 					Debug.LogWarning(string.Format("Slot '{0}' not found for BoundingBoxFollowerGraphic on '{1}'. (Previous colliders were disposed.)", slotName, this.gameObject.name));
 				return;
 			}
+			int slotIndex = slot.Data.Index;
 
 			int requiredCollidersCount = 0;
 			var colliders = GetComponents<PolygonCollider2D>();
@@ -136,8 +132,8 @@ namespace Spine.Unity {
 				foreach (var skin in skeleton.Data.Skins)
 					AddCollidersForSkin(skin, slotIndex, colliders, scale, ref requiredCollidersCount);
 
-				if (skeleton.skin != null)
-					AddCollidersForSkin(skeleton.skin, slotIndex, colliders, scale, ref requiredCollidersCount);
+				if (skeleton.Skin != null)
+					AddCollidersForSkin(skeleton.Skin, slotIndex, colliders, scale, ref requiredCollidersCount);
 			}
 			DisposeExcessCollidersAfter(requiredCollidersCount);
 
@@ -171,9 +167,10 @@ namespace Spine.Unity {
 						++collidersCount;
 						SkeletonUtility.SetColliderPointsLocal(bbCollider, slot, boundingBoxAttachment, scale);
 						bbCollider.isTrigger = isTrigger;
+						bbCollider.usedByEffector = usedByEffector;
+						bbCollider.usedByComposite = usedByComposite;
 						bbCollider.enabled = false;
 						bbCollider.hideFlags = HideFlags.NotEditable;
-						bbCollider.isTrigger = IsTrigger;
 						colliderTable.Add(boundingBoxAttachment, bbCollider);
 						nameTable.Add(boundingBoxAttachment, entry.Name);
 					}
@@ -211,7 +208,7 @@ namespace Spine.Unity {
 						DestroyImmediate(collider);
 					else
 #endif
-						Destroy(collider);
+					Destroy(collider);
 				}
 			}
 		}

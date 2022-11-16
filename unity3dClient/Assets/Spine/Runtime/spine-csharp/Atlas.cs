@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -245,6 +245,10 @@ namespace Spine {
 					if (region.degrees == 90) {
 						region.u2 = (region.x + region.height) / (float)page.width;
 						region.v2 = (region.y + region.width) / (float)page.height;
+
+						var tempSwap = region.packedWidth;
+						region.packedWidth = region.packedHeight;
+						region.packedHeight = tempSwap;
 					} else {
 						region.u2 = (region.x + region.width) / (float)page.width;
 						region.v2 = (region.y + region.height) / (float)page.height;
@@ -261,7 +265,7 @@ namespace Spine {
 			int colon = line.IndexOf(':');
 			if (colon == -1) return 0;
 			entry[0] = line.Substring(0, colon).Trim();
-			for (int i = 1, lastMatch = colon + 1;; i++) {
+			for (int i = 1, lastMatch = colon + 1; ; i++) {
 				int comma = line.IndexOf(',', lastMatch);
 				if (comma == -1) {
 					entry[i] = line.Substring(lastMatch).Trim();
@@ -339,18 +343,22 @@ namespace Spine {
 		}
 	}
 
-	public class AtlasRegion {
+	public class AtlasRegion : TextureRegion {
 		public AtlasPage page;
 		public string name;
-		public int x, y, width, height;
-		public float u, v, u2, v2;
+		public int x, y;
 		public float offsetX, offsetY;
 		public int originalWidth, originalHeight;
+		public int packedWidth { get { return width; } set { width = value; } }
+		public int packedHeight { get { return height; } set { height = value; } }
 		public int degrees;
 		public bool rotate;
 		public int index;
 		public string[] names;
 		public int[][] values;
+
+		override public int OriginalWidth { get { return originalWidth; } }
+		override public int OriginalHeight { get { return originalHeight; } }
 
 		public AtlasRegion Clone () {
 			return MemberwiseClone() as AtlasRegion;

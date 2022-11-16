@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,9 +27,9 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
-using System.Collections.Generic;
 using Spine.Unity.AnimationTools;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Spine.Unity {
 
@@ -63,7 +63,7 @@ namespace Spine.Unity {
 
 			var animation = track.Animation;
 			float start = track.AnimationTime;
-			float end = animation.duration;
+			float end = animation.Duration;
 			return GetAnimationRootMotion(start, end, animation);
 		}
 
@@ -79,7 +79,7 @@ namespace Spine.Unity {
 
 		protected override float AdditionalScale {
 			get {
-				return canvas ? canvas.referencePixelsPerUnit: 1.0f;
+				return canvas ? canvas.referencePixelsPerUnit : 1.0f;
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace Spine.Unity {
 				TrackEntry next = null;
 				while (track != null) {
 					var animation = track.Animation;
-					float start = track.animationLast;
+					float start = track.AnimationLast;
 					float end = track.AnimationTime;
 					var currentDelta = GetAnimationRootMotion(start, end, animation);
 					if (currentDelta != Vector2.zero) {
@@ -122,35 +122,74 @@ namespace Spine.Unity {
 
 					// Traverse mixingFrom chain.
 					next = track;
-					track = track.mixingFrom;
+					track = track.MixingFrom;
+				}
+			}
+			return localDelta;
+		}
+
+		protected override float CalculateAnimationsRotationDelta () {
+			float localDelta = 0;
+			int trackCount = animationState.Tracks.Count;
+
+			for (int trackIndex = 0; trackIndex < trackCount; ++trackIndex) {
+				// note: animationTrackFlags != -1 below covers trackIndex >= 32,
+				// with -1 corresponding to entry "everything" of the dropdown list.
+				if (animationTrackFlags != -1 && (animationTrackFlags & 1 << trackIndex) == 0)
+					continue;
+
+				TrackEntry track = animationState.GetCurrent(trackIndex);
+				TrackEntry next = null;
+				while (track != null) {
+					var animation = track.Animation;
+					float start = track.AnimationLast;
+					float end = track.AnimationTime;
+					var currentDelta = GetAnimationRootMotionRotation(start, end, animation);
+					if (currentDelta != 0) {
+						ApplyMixAlphaToDelta(ref currentDelta, next, track);
+						localDelta += currentDelta;
+					}
+
+					// Traverse mixingFrom chain.
+					next = track;
+					track = track.MixingFrom;
 				}
 			}
 			return localDelta;
 		}
 
 		void ApplyMixAlphaToDelta (ref Vector2 currentDelta, TrackEntry next, TrackEntry track) {
-			// Apply mix alpha to the delta position (based on AnimationState.cs).
+			float mixAlpha = 1;
+			GetMixAlpha(ref mixAlpha, next, track);
+			currentDelta *= mixAlpha;
+		}
+
+		void ApplyMixAlphaToDelta (ref float currentDelta, TrackEntry next, TrackEntry track) {
+			float mixAlpha = 1;
+			GetMixAlpha(ref mixAlpha, next, track);
+			currentDelta *= mixAlpha;
+		}
+
+		void GetMixAlpha (ref float cumulatedMixAlpha, TrackEntry next, TrackEntry track) {
+			// code below based on AnimationState.cs
 			float mix;
 			if (next != null) {
-				if (next.mixDuration == 0) { // Single frame mix to undo mixingFrom changes.
+				if (next.MixDuration == 0) { // Single frame mix to undo mixingFrom changes.
 					mix = 1;
-				}
-				else {
-					mix = next.mixTime / next.mixDuration;
+				} else {
+					mix = next.MixTime / next.MixDuration;
 					if (mix > 1) mix = 1;
 				}
-				float mixAndAlpha = track.alpha * next.interruptAlpha * (1 - mix);
-				currentDelta *= mixAndAlpha;
-			}
-			else {
-				if (track.mixDuration == 0) {
+				float mixAndAlpha = track.Alpha * next.InterruptAlpha * (1 - mix);
+				cumulatedMixAlpha *= mixAndAlpha;
+			} else {
+				if (track.MixDuration == 0) {
 					mix = 1;
-				}
-				else {
-					mix = track.alpha * (track.mixTime / track.mixDuration);
+				} else {
+					mix = track.Alpha * (track.MixTime / track.MixDuration);
 					if (mix > 1) mix = 1;
 				}
-				currentDelta *= mix;
+				cumulatedMixAlpha *= mix;
 			}
 		}
 	}

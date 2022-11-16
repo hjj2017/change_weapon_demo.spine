@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,9 +27,9 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
-using System.Collections;
 using Spine;
+using System.Collections;
+using UnityEngine;
 
 namespace Spine.Unity {
 	/// <summary>
@@ -103,15 +103,15 @@ namespace Spine.Unity {
 
 		#region Event Handlers
 		void HandleAnimationStateEventByName (Spine.TrackEntry trackEntry, Spine.Event e) {
-			m_WasFired |= (e.Data.Name == m_EventName);			// Check event name string match.
+			m_WasFired |= (e.Data.Name == m_EventName);         // Check event name string match.
 			if (m_WasFired && m_unsubscribeAfterFiring)
-				m_AnimationState.Event -= HandleAnimationStateEventByName;	// Unsubscribe after correct event fires.
+				m_AnimationState.Event -= HandleAnimationStateEventByName;  // Unsubscribe after correct event fires.
 		}
 
 		void HandleAnimationStateEvent (Spine.TrackEntry trackEntry, Spine.Event e) {
-			m_WasFired |= (e.Data == m_TargetEvent);			// Check event data reference match.
+			m_WasFired |= (e.Data == m_TargetEvent);            // Check event data reference match.
 			if (m_WasFired && m_unsubscribeAfterFiring)
-				m_AnimationState.Event -= HandleAnimationStateEvent; 		// Usubscribe after correct event fires.
+				m_AnimationState.Event -= HandleAnimationStateEvent;        // Usubscribe after correct event fires.
 		}
 		#endregion
 
@@ -146,7 +146,7 @@ namespace Spine.Unity {
 		#region IEnumerator
 		bool IEnumerator.MoveNext () {
 			if (m_WasFired) {
-				((IEnumerator)this).Reset();	// auto-reset for YieldInstruction reuse
+				((IEnumerator)this).Reset();    // auto-reset for YieldInstruction reuse
 				return false;
 			}
 

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,64 +27,12 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Spine.Unity.AttachmentTools {
 	public static class AttachmentRegionExtensions {
-		#region SetRegion
-		/// <summary>
-		/// Tries to set the region (image) of a renderable attachment. If the attachment is not renderable, nothing is applied.</summary>
-		public static void SetRegion (this Attachment attachment, AtlasRegion region, bool updateOffset = true) {
-			var regionAttachment = attachment as RegionAttachment;
-			if (regionAttachment != null)
-				regionAttachment.SetRegion(region, updateOffset);
-
-			var meshAttachment = attachment as MeshAttachment;
-			if (meshAttachment != null)
-				meshAttachment.SetRegion(region, updateOffset);
-		}
-
-		/// <summary>Sets the region (image) of a RegionAttachment</summary>
-		public static void SetRegion (this RegionAttachment attachment, AtlasRegion region, bool updateOffset = true) {
-			if (region == null) throw new System.ArgumentNullException("region");
-
-			// (AtlasAttachmentLoader.cs)
-			attachment.RendererObject = region;
-			attachment.SetUVs(region.u, region.v, region.u2, region.v2, region.degrees);
-			attachment.regionOffsetX = region.offsetX;
-			attachment.regionOffsetY = region.offsetY;
-			attachment.regionWidth = region.width;
-			attachment.regionHeight = region.height;
-			attachment.regionOriginalWidth = region.originalWidth;
-			attachment.regionOriginalHeight = region.originalHeight;
-
-			if (updateOffset) attachment.UpdateOffset();
-		}
-
-		/// <summary>Sets the region (image) of a MeshAttachment</summary>
-		public static void SetRegion (this MeshAttachment attachment, AtlasRegion region, bool updateUVs = true) {
-			if (region == null) throw new System.ArgumentNullException("region");
-
-			// (AtlasAttachmentLoader.cs)
-			attachment.RendererObject = region;
-			attachment.RegionU = region.u;
-			attachment.RegionV = region.v;
-			attachment.RegionU2 = region.u2;
-			attachment.RegionV2 = region.v2;
-			attachment.RegionDegrees = region.degrees;
-			attachment.regionOffsetX = region.offsetX;
-			attachment.regionOffsetY = region.offsetY;
-			attachment.regionWidth = region.width;
-			attachment.regionHeight = region.height;
-			attachment.regionOriginalWidth = region.originalWidth;
-			attachment.regionOriginalHeight = region.originalHeight;
-
-			if (updateUVs) attachment.UpdateUVs();
-		}
-		#endregion
-
 		#region Runtime RegionAttachments
 		/// <summary>
 		/// Creates a RegionAttachment based on a sprite. This method creates a real, usable AtlasRegion. That AtlasRegion uses a new AtlasPage with the Material provided./// </summary>
@@ -128,61 +76,57 @@ namespace Spine.Unity.AttachmentTools {
 			// (AtlasAttachmentLoader.cs)
 			var attachment = new RegionAttachment(attachmentName);
 
-			attachment.RendererObject = region;
-			attachment.SetUVs(region.u, region.v, region.u2, region.v2, region.degrees);
-			attachment.regionOffsetX = region.offsetX;
-			attachment.regionOffsetY = region.offsetY;
-			attachment.regionWidth = region.width;
-			attachment.regionHeight = region.height;
-			attachment.regionOriginalWidth = region.originalWidth;
-			attachment.regionOriginalHeight = region.originalHeight;
-
+			attachment.Region = region;
 			attachment.Path = region.name;
-			attachment.scaleX = 1;
-			attachment.scaleY = 1;
-			attachment.rotation = rotation;
+			attachment.ScaleX = 1;
+			attachment.ScaleY = 1;
+			attachment.Rotation = rotation;
 
-			attachment.r = 1;
-			attachment.g = 1;
-			attachment.b = 1;
-			attachment.a = 1;
+			attachment.R = 1;
+			attachment.G = 1;
+			attachment.B = 1;
+			attachment.A = 1;
 
 			// pass OriginalWidth and OriginalHeight because UpdateOffset uses it in its calculation.
-			attachment.width = attachment.regionOriginalWidth * scale;
-			attachment.height = attachment.regionOriginalHeight * scale;
+			var textreRegion = attachment.Region;
+			var atlasRegion = textreRegion as AtlasRegion;
+			float originalWidth = atlasRegion != null ? atlasRegion.originalWidth : textreRegion.width;
+			float originalHeight = atlasRegion != null ? atlasRegion.originalHeight : textreRegion.height;
+			attachment.Width = originalWidth * scale;
+			attachment.Height = originalHeight * scale;
 
 			attachment.SetColor(Color.white);
-			attachment.UpdateOffset();
+			attachment.UpdateRegion();
 			return attachment;
 		}
 
 		/// <summary> Sets the scale. Call regionAttachment.UpdateOffset to apply the change.</summary>
 		public static void SetScale (this RegionAttachment regionAttachment, Vector2 scale) {
-			regionAttachment.scaleX = scale.x;
-			regionAttachment.scaleY = scale.y;
+			regionAttachment.ScaleX = scale.x;
+			regionAttachment.ScaleY = scale.y;
 		}
 
 		/// <summary> Sets the scale. Call regionAttachment.UpdateOffset to apply the change.</summary>
 		public static void SetScale (this RegionAttachment regionAttachment, float x, float y) {
-			regionAttachment.scaleX = x;
-			regionAttachment.scaleY = y;
+			regionAttachment.ScaleX = x;
+			regionAttachment.ScaleY = y;
 		}
 
 		/// <summary> Sets the position offset. Call regionAttachment.UpdateOffset to apply the change.</summary>
 		public static void SetPositionOffset (this RegionAttachment regionAttachment, Vector2 offset) {
-			regionAttachment.x = offset.x;
-			regionAttachment.y = offset.y;
+			regionAttachment.X = offset.x;
+			regionAttachment.Y = offset.y;
 		}
 
 		/// <summary> Sets the position offset. Call regionAttachment.UpdateOffset to apply the change.</summary>
 		public static void SetPositionOffset (this RegionAttachment regionAttachment, float x, float y) {
-			regionAttachment.x = x;
-			regionAttachment.y = y;
+			regionAttachment.X = x;
+			regionAttachment.Y = y;
 		}
 
 		/// <summary> Sets the rotation. Call regionAttachment.UpdateOffset to apply the change.</summary>
 		public static void SetRotation (this RegionAttachment regionAttachment, float rotation) {
-			regionAttachment.rotation = rotation;
+			regionAttachment.Rotation = rotation;
 		}
 		#endregion
 	}

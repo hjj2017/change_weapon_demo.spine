@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -38,8 +38,8 @@ namespace Spine {
 	/// See <a href="http://esotericsoftware.com/spine-transform-constraints">Transform constraints</a> in the Spine User Guide.</para>
 	/// </summary>
 	public class TransformConstraint : IUpdatable {
-		internal TransformConstraintData data;
-		internal ExposedList<Bone> bones;
+		internal readonly TransformConstraintData data;
+		internal readonly ExposedList<Bone> bones;
 		internal Bone target;
 		internal float mixRotate, mixX, mixY, mixScaleX, mixScaleY, mixShearY;
 
@@ -57,9 +57,9 @@ namespace Spine {
 			mixShearY = data.mixShearY;
 			bones = new ExposedList<Bone>();
 			foreach (BoneData boneData in data.bones)
-				bones.Add (skeleton.FindBone(boneData.name));
+				bones.Add(skeleton.bones.Items[boneData.index]);
 
-			target = skeleton.FindBone(data.target.name);
+			target = skeleton.bones.Items[data.target.index];
 		}
 
 		/// <summary>Copy constructor.</summary>
@@ -276,8 +276,8 @@ namespace Spine {
 				float rotation = bone.arotation + (target.arotation + data.offsetRotation) * mixRotate;
 				float x = bone.ax + (target.ax + data.offsetX) * mixX;
 				float y = bone.ay + (target.ay + data.offsetY) * mixY;
-				float scaleX = (bone.ascaleX * ((target.ascaleX - 1 + data.offsetScaleX) * mixScaleX) + 1);
-				float scaleY = (bone.ascaleY * ((target.ascaleY - 1 + data.offsetScaleY) * mixScaleY) + 1);
+				float scaleX = bone.ascaleX * (((target.ascaleX - 1 + data.offsetScaleX) * mixScaleX) + 1);
+				float scaleY = bone.ascaleY * (((target.ascaleY - 1 + data.offsetScaleY) * mixScaleY) + 1);
 				float shearY = bone.ashearY + (target.ashearY + data.offsetShearY) * mixShearY;
 
 				bone.UpdateWorldTransform(x, y, rotation, scaleX, scaleY, bone.ashearX, shearY);

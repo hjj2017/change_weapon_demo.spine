@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -47,14 +47,19 @@ namespace Spine {
 			: base(name) {
 		}
 
+		/// <summary>Copy constructor.</summary>
+		protected PathAttachment (PathAttachment other)
+			: base(other) {
+
+			lengths = new float[other.lengths.Length];
+			Array.Copy(other.lengths, 0, lengths, 0, lengths.Length);
+
+			closed = other.closed;
+			constantSpeed = other.constantSpeed;
+		}
+
 		public override Attachment Copy () {
-			PathAttachment copy = new PathAttachment(this.Name);
-			CopyTo(copy);
-			copy.lengths = new float[lengths.Length];
-			Array.Copy(lengths, 0, copy.lengths, 0, lengths.Length);
-			copy.closed = closed;
-			copy.constantSpeed = constantSpeed;
-			return copy;
+			return new PathAttachment(this);
 		}
 	}
 }

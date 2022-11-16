@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,9 +31,9 @@
 #define SPINE_TRIANGLECHECK // Avoid calling SetTriangles at the cost of checking for mesh differences (vertex counts, memberwise attachment list compare) every frame.
 //#define SPINE_DEBUG
 
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Spine.Unity {
 	/// <summary>A double-buffered Mesh, and a shared material array, bundled for use by Spine components that need to push a Mesh and materials to a Unity MeshRenderer and MeshFilter.</summary>
@@ -119,14 +119,14 @@ namespace Spine.Unity {
 
 			public void Dispose () {
 				if (mesh != null) {
-					#if UNITY_EDITOR
+#if UNITY_EDITOR
 					if (Application.isEditor && !Application.isPlaying)
 						UnityEngine.Object.DestroyImmediate(mesh);
 					else
 						UnityEngine.Object.Destroy(mesh);
-					#else
+#else
 					UnityEngine.Object.Destroy(mesh);
-					#endif
+#endif
 				}
 				mesh = null;
 			}

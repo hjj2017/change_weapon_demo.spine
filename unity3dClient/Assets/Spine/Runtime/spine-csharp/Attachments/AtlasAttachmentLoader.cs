@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -43,37 +43,38 @@ namespace Spine {
 			this.atlasArray = atlasArray;
 		}
 
-		public RegionAttachment NewRegionAttachment (Skin skin, string name, string path) {
-			AtlasRegion region = FindRegion(path);
-			if (region == null) throw new ArgumentException(string.Format("Region not found in atlas: {0} (region attachment: {1})", path, name));
+		private void LoadSequence (string name, string basePath, Sequence sequence) {
+			TextureRegion[] regions = sequence.Regions;
+			for (int i = 0, n = regions.Length; i < n; i++) {
+				string path = sequence.GetPath(basePath, i);
+				regions[i] = FindRegion(path);
+				if (regions[i] == null) throw new ArgumentException(string.Format("Region not found in atlas: {0} (region attachment: {1})", path, name));
+			}
+		}
+
+		public RegionAttachment NewRegionAttachment (Skin skin, string name, string path, Sequence sequence) {
 			RegionAttachment attachment = new RegionAttachment(name);
-			attachment.RendererObject = region;
-			attachment.SetUVs(region.u, region.v, region.u2, region.v2, region.degrees);
-			attachment.regionOffsetX = region.offsetX;
-			attachment.regionOffsetY = region.offsetY;
-			attachment.regionWidth = region.width;
-			attachment.regionHeight = region.height;
-			attachment.regionOriginalWidth = region.originalWidth;
-			attachment.regionOriginalHeight = region.originalHeight;
+			if (sequence != null)
+				LoadSequence(name, path, sequence);
+			else {
+				AtlasRegion region = FindRegion(path);
+				if (region == null)
+					throw new ArgumentException(string.Format("Region not found in atlas: {0} (region attachment: {1})", path, name));
+				attachment.Region = region;
+			}
 			return attachment;
 		}
 
-		public MeshAttachment NewMeshAttachment (Skin skin, string name, string path) {
-			AtlasRegion region = FindRegion(path);
-			if (region == null) throw new ArgumentException(string.Format("Region not found in atlas: {0} (region attachment: {1})", path, name));
+		public MeshAttachment NewMeshAttachment (Skin skin, string name, string path, Sequence sequence) {
 			MeshAttachment attachment = new MeshAttachment(name);
-			attachment.RendererObject = region;
-			attachment.RegionU = region.u;
-			attachment.RegionV = region.v;
-			attachment.RegionU2 = region.u2;
-			attachment.RegionV2 = region.v2;
-			attachment.RegionDegrees = region.degrees;
-			attachment.regionOffsetX = region.offsetX;
-			attachment.regionOffsetY = region.offsetY;
-			attachment.regionWidth = region.width;
-			attachment.regionHeight = region.height;
-			attachment.regionOriginalWidth = region.originalWidth;
-			attachment.regionOriginalHeight = region.originalHeight;
+			if (sequence != null)
+				LoadSequence(name, path, sequence);
+			else {
+				AtlasRegion region = FindRegion(path);
+				if (region == null)
+					throw new ArgumentException(string.Format("Region not found in atlas: {0} (region attachment: {1})", path, name));
+				attachment.Region = region;
+			}
 			return attachment;
 		}
 
@@ -89,7 +90,7 @@ namespace Spine {
 			return new PointAttachment(name);
 		}
 
-		public ClippingAttachment NewClippingAttachment(Skin skin, string name) {
+		public ClippingAttachment NewClippingAttachment (Skin skin, string name) {
 			return new ClippingAttachment(name);
 		}
 

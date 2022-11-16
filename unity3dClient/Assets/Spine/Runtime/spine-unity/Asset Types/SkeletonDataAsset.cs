@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -41,12 +41,12 @@ namespace Spine.Unity {
 		#region Inspector
 		public AtlasAssetBase[] atlasAssets = new AtlasAssetBase[0];
 
-		#if SPINE_TK2D
+#if SPINE_TK2D
 		public tk2dSpriteCollectionData spriteCollection;
 		public float scale = 1f;
-		#else
+#else
 		public float scale = 0.01f;
-		#endif
+#endif
 		public TextAsset skeletonJSON;
 
 		public bool isUpgradingBlendModeMaterials = false;
@@ -63,6 +63,10 @@ namespace Spine.Unity {
 		public float defaultMix;
 		public RuntimeAnimatorController controller;
 
+#if UNITY_EDITOR
+		public static bool errorIfSkeletonFileNullGlobal = true;
+#endif
+
 		public bool IsLoaded { get { return this.skeletonData != null; } }
 
 		void Reset () {
@@ -77,7 +81,7 @@ namespace Spine.Unity {
 		/// <summary>
 		/// Creates a runtime SkeletonDataAsset.</summary>
 		public static SkeletonDataAsset CreateRuntimeInstance (TextAsset skeletonDataFile, AtlasAssetBase atlasAsset, bool initialize, float scale = 0.01f) {
-			return CreateRuntimeInstance(skeletonDataFile, new [] {atlasAsset}, initialize, scale);
+			return CreateRuntimeInstance(skeletonDataFile, new[] { atlasAsset }, initialize, scale);
 		}
 
 		/// <summary>
@@ -112,6 +116,9 @@ namespace Spine.Unity {
 		/// <summary>Loads, caches and returns the SkeletonData from the skeleton data file. Returns the cached SkeletonData after the first time it is called. Pass false to prevent direct errors from being logged.</summary>
 		public SkeletonData GetSkeletonData (bool quiet) {
 			if (skeletonJSON == null) {
+#if UNITY_EDITOR
+				if (!errorIfSkeletonFileNullGlobal) quiet = true;
+#endif
 				if (!quiet)
 					Debug.LogError("Skeleton JSON file not set for SkeletonData asset: " + name, this);
 				Clear();
@@ -145,10 +152,10 @@ namespace Spine.Unity {
 			float skeletonDataScale;
 			Atlas[] atlasArray = this.GetAtlasArray();
 
-			#if !SPINE_TK2D
+#if !SPINE_TK2D
 			attachmentLoader = (atlasArray.Length == 0) ? (AttachmentLoader)new RegionlessAttachmentLoader() : (AttachmentLoader)new AtlasAttachmentLoader(atlasArray);
 			skeletonDataScale = scale;
-			#else
+#else
 			if (spriteCollection != null) {
 				attachmentLoader = new Spine.Unity.TK2D.SpriteCollectionAttachmentLoader(spriteCollection);
 				skeletonDataScale = (1.0f / (spriteCollection.invOrthoSize * spriteCollection.halfTargetHeight) * scale);
@@ -161,7 +168,7 @@ namespace Spine.Unity {
 				attachmentLoader = new AtlasAttachmentLoader(atlasArray);
 				skeletonDataScale = scale;
 			}
-			#endif
+#endif
 
 			bool hasBinaryExtension = skeletonJSON.name.ToLower().Contains(".skel");
 			SkeletonData loadedSkeletonData = null;
@@ -176,7 +183,7 @@ namespace Spine.Unity {
 					Debug.LogError("Error reading skeleton JSON file for SkeletonData asset: " + name + "\n" + ex.Message + "\n" + ex.StackTrace, skeletonJSON);
 			}
 
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			if (loadedSkeletonData == null && !quiet && skeletonJSON != null) {
 				string problemDescription = null;
 				bool isSpineSkeletonData;
@@ -192,7 +199,7 @@ namespace Spine.Unity {
 					return null;
 				}
 			}
-			#endif
+#endif
 			if (loadedSkeletonData == null)
 				return null;
 
@@ -217,14 +224,30 @@ namespace Spine.Unity {
 			FillStateData();
 		}
 
-		public void FillStateData () {
+		public void FillStateData (bool quiet = false) {
 			if (stateData != null) {
-				stateData.defaultMix = defaultMix;
+				stateData.DefaultMix = defaultMix;
 
 				for (int i = 0, n = fromAnimation.Length; i < n; i++) {
-					if (fromAnimation[i].Length == 0 || toAnimation[i].Length == 0)
+					string fromAnimationName = fromAnimation[i];
+					string toAnimationName = toAnimation[i];
+					if (fromAnimationName.Length == 0 || toAnimationName.Length == 0)
 						continue;
-					stateData.SetMix(fromAnimation[i], toAnimation[i], duration[i]);
+#if UNITY_EDITOR
+					if (skeletonData.FindAnimation(fromAnimationName) == null) {
+						if (!quiet) Debug.LogError(
+							string.Format("Custom Mix Durations: Animation '{0}' not found, was it renamed?",
+								fromAnimationName), this);
+						continue;
+					}
+					if (skeletonData.FindAnimation(toAnimationName) == null) {
+						if (!quiet) Debug.LogError(
+							string.Format("Custom Mix Durations: Animation '{0}' not found, was it renamed?",
+								toAnimationName), this);
+						continue;
+					}
+#endif
+					stateData.SetMix(fromAnimationName, toAnimationName, duration[i]);
 				}
 			}
 		}

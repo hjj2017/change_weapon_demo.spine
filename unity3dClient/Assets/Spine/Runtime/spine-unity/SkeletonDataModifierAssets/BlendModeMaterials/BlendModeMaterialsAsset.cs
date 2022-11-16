@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,13 +27,12 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+using Spine;
+using Spine.Unity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-using Spine;
-using Spine.Unity;
 
 namespace Spine.Unity {
 	[CreateAssetMenu(menuName = "Spine/SkeletonData Modifiers/Blend Mode Materials", order = 200)]
@@ -56,31 +55,32 @@ namespace Spine.Unity {
 				var slotsItems = skeletonData.Slots.Items;
 				for (int slotIndex = 0, slotCount = skeletonData.Slots.Count; slotIndex < slotCount; slotIndex++) {
 					var slot = slotsItems[slotIndex];
-					if (slot.blendMode == BlendMode.Normal) continue;
-					if (!includeAdditiveSlots && slot.blendMode == BlendMode.Additive) continue;
+					if (slot.BlendMode == BlendMode.Normal) continue;
+					if (!includeAdditiveSlots && slot.BlendMode == BlendMode.Additive) continue;
 
 					entryBuffer.Clear();
 					foreach (var skin in skeletonData.Skins)
 						skin.GetAttachments(slotIndex, entryBuffer);
 
 					Material templateMaterial = null;
-					switch (slot.blendMode) {
-						case BlendMode.Multiply:
-							templateMaterial = multiplyTemplate;
-							break;
-						case BlendMode.Screen:
-							templateMaterial = screenTemplate;
-							break;
-						case BlendMode.Additive:
-							templateMaterial = additiveTemplate;
-							break;
+					switch (slot.BlendMode) {
+					case BlendMode.Multiply:
+						templateMaterial = multiplyTemplate;
+						break;
+					case BlendMode.Screen:
+						templateMaterial = screenTemplate;
+						break;
+					case BlendMode.Additive:
+						templateMaterial = additiveTemplate;
+						break;
 					}
 					if (templateMaterial == null) continue;
 
 					foreach (var entry in entryBuffer) {
-						var renderableAttachment = entry.Attachment as IHasRendererObject;
+						var renderableAttachment = entry.Attachment as IHasTextureRegion;
 						if (renderableAttachment != null) {
-							renderableAttachment.RendererObject = materialCache.CloneAtlasRegionWithMaterial((AtlasRegion)renderableAttachment.RendererObject, templateMaterial);
+							renderableAttachment.Region = materialCache.CloneAtlasRegionWithMaterial(
+								(AtlasRegion)renderableAttachment.Region, templateMaterial);
 						}
 					}
 				}

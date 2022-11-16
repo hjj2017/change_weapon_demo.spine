@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,9 +27,9 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
 using System;
 using System.Collections;
+using UnityEngine;
 
 namespace Spine.Unity {
 
@@ -252,7 +252,11 @@ namespace Spine.Unity {
 
 		public static Spine.Attachment GetAttachment (string attachmentPath, Spine.SkeletonData skeletonData) {
 			var hierarchy = SpineAttachment.GetHierarchy(attachmentPath);
-			return string.IsNullOrEmpty(hierarchy.name) ? null : skeletonData.FindSkin(hierarchy.skin).GetAttachment(skeletonData.FindSlotIndex(hierarchy.slot), hierarchy.name);
+			if (string.IsNullOrEmpty(hierarchy.name)) return null;
+
+			SlotData slot = skeletonData.FindSlot(hierarchy.slot);
+			if (slot == null) return null;
+			return skeletonData.FindSkin(hierarchy.skin).GetAttachment(slot.Index, hierarchy.name);
 		}
 
 		public static Spine.Attachment GetAttachment (string attachmentPath, SkeletonDataAsset skeletonDataAsset) {
@@ -267,14 +271,13 @@ namespace Spine.Unity {
 			public string name;
 
 			public Hierarchy (string fullPath) {
-				string[] chunks = fullPath.Split(new char[]{'/'}, System.StringSplitOptions.RemoveEmptyEntries);
+				string[] chunks = fullPath.Split(new char[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
 				if (chunks.Length == 0) {
 					skin = "";
 					slot = "";
 					name = "";
 					return;
-				}
-				else if (chunks.Length < 2) {
+				} else if (chunks.Length < 2) {
 					throw new System.Exception("Cannot generate Attachment Hierarchy from string! Not enough components! [" + fullPath + "]");
 				}
 				skin = chunks[0];

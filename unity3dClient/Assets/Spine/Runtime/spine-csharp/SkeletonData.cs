@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -43,7 +43,8 @@ namespace Spine {
 		internal ExposedList<IkConstraintData> ikConstraints = new ExposedList<IkConstraintData>();
 		internal ExposedList<TransformConstraintData> transformConstraints = new ExposedList<TransformConstraintData>();
 		internal ExposedList<PathConstraintData> pathConstraints = new ExposedList<PathConstraintData>();
-		internal float x , y, width, height;
+		internal ExposedList<SpringConstraintData> springConstraints = new ExposedList<SpringConstraintData>();
+		internal float x, y, width, height;
 		internal string version, hash;
 
 		// Nonessential.
@@ -95,7 +96,7 @@ namespace Spine {
 		/// <summary>The dopesheet FPS in Spine, or zero if nonessential data was not exported.</summary>
 		public float Fps { get { return fps; } set { fps = value; } }
 
-		// --- Bones.
+		// --- Bones
 
 		/// <summary>
 		/// Finds a bone by comparing each bone's name.
@@ -111,16 +112,7 @@ namespace Spine {
 			return null;
 		}
 
-		/// <returns>-1 if the bone was not found.</returns>
-		public int FindBoneIndex (string boneName) {
-			if (boneName == null) throw new ArgumentNullException("boneName", "boneName cannot be null.");
-			var bones = this.bones.Items;
-			for (int i = 0, n = this.bones.Count; i < n; i++)
-				if (bones[i].name == boneName) return i;
-			return -1;
-		}
-
-		// --- Slots.
+		// --- Slots
 
 		/// <returns>May be null.</returns>
 		public SlotData FindSlot (string slotName) {
@@ -133,16 +125,7 @@ namespace Spine {
 			return null;
 		}
 
-		/// <returns>-1 if the slot was not found.</returns>
-		public int FindSlotIndex (string slotName) {
-			if (slotName == null) throw new ArgumentNullException("slotName", "slotName cannot be null.");
-			SlotData[] slots = this.slots.Items;
-			for (int i = 0, n = this.slots.Count; i < n; i++)
-				if (slots[i].name == slotName) return i;
-			return -1;
-		}
-
-		// --- Skins.
+		// --- Skins
 
 		/// <returns>May be null.</returns>
 		public Skin FindSkin (string skinName) {
@@ -152,7 +135,7 @@ namespace Spine {
 			return null;
 		}
 
-		// --- Events.
+		// --- Events
 
 		/// <returns>May be null.</returns>
 		public EventData FindEvent (string eventDataName) {
@@ -162,7 +145,7 @@ namespace Spine {
 			return null;
 		}
 
-		// --- Animations.
+		// --- Animations
 
 		/// <returns>May be null.</returns>
 		public Animation FindAnimation (string animationName) {
@@ -175,7 +158,7 @@ namespace Spine {
 			return null;
 		}
 
-		// --- IK constraints.
+		// --- IK constraints
 
 		/// <returns>May be null.</returns>
 		public IkConstraintData FindIkConstraint (string constraintName) {
@@ -188,7 +171,7 @@ namespace Spine {
 			return null;
 		}
 
-		// --- Transform constraints.
+		// --- Transform constraints
 
 		/// <returns>May be null.</returns>
 		public TransformConstraintData FindTransformConstraint (string constraintName) {
@@ -201,8 +184,12 @@ namespace Spine {
 			return null;
 		}
 
-		// --- Path constraints.
+		// --- Path constraints
 
+		/// <summary>
+		/// Finds a path constraint by comparing each path constraint's name. It is more efficient to cache the results of this method
+		/// than to call it multiple times.
+		/// </summary>
 		/// <returns>May be null.</returns>
 		public PathConstraintData FindPathConstraint (string constraintName) {
 			if (constraintName == null) throw new ArgumentNullException("constraintName", "constraintName cannot be null.");
@@ -214,13 +201,21 @@ namespace Spine {
 			return null;
 		}
 
-		/// <returns>-1 if the path constraint was not found.</returns>
-		public int FindPathConstraintIndex (string pathConstraintName) {
-			if (pathConstraintName == null) throw new ArgumentNullException("pathConstraintName", "pathConstraintName cannot be null.");
-			PathConstraintData[] pathConstraints = this.pathConstraints.Items;
-			for (int i = 0, n = this.pathConstraints.Count; i < n; i++)
-				if (pathConstraints[i].name.Equals(pathConstraintName)) return i;
-			return -1;
+		// --- Spring constraints
+
+		/// <summary>
+		/// Finds a spring constraint by comparing each spring constraint's name. It is more efficient to cache the results of this
+		/// method than to call it multiple times.
+		/// </summary>
+		/// <returns>May be null.</returns>
+		public SpringConstraintData FindSpringConstraint (String constraintName) {
+			if (constraintName == null) throw new ArgumentNullException("constraintName", "constraintName cannot be null.");
+			Object[] springConstraints = this.springConstraints.Items;
+			for (int i = 0, n = this.springConstraints.Count; i < n; i++) {
+				SpringConstraintData constraint = (SpringConstraintData)springConstraints[i];
+				if (constraint.name.Equals(constraintName)) return constraint;
+			}
+			return null;
 		}
 
 		// ---

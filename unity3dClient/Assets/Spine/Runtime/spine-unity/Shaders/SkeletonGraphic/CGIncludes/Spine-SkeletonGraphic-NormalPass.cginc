@@ -26,6 +26,11 @@ fixed4 _Color;
 fixed4 _TextureSampleAdd;
 float4 _ClipRect;
 
+#ifdef ENABLE_FILL
+float4 _FillColor;
+float _FillPhase;
+#endif
+
 VertexOutput vert (VertexInput IN) {
 	VertexOutput OUT;
 
@@ -49,7 +54,8 @@ VertexOutput vert (VertexInput IN) {
 #else
 	// Note: CanvasRenderer performs a GammaToTargetSpace conversion on vertex color already,
 	// however incorrectly assuming straight alpha color.
-	float4 vertexColor = PMAGammaToTargetSpace(half4(TargetToGammaSpace(IN.color.rgb), IN.color.a));
+	// Saturated version used to prevent numerical issues of certain low-alpha values.
+	float4 vertexColor = PMAGammaToTargetSpaceSaturated(half4(TargetToGammaSpace(IN.color.rgb), IN.color.a));
 #endif
 	OUT.color = vertexColor * float4(_Color.rgb * _Color.a, _Color.a); // Combine a PMA version of _Color with vertexColor.
 	return OUT;
@@ -72,6 +78,9 @@ fixed4 frag (VertexOutput IN) : SV_Target
 	clip (color.a - 0.001);
 	#endif
 
+	#ifdef ENABLE_FILL
+	color.rgb = lerp(color.rgb, (_FillColor.rgb * color.a), _FillPhase); // make sure to PMA _FillColor.
+	#endif
 	return color;
 }
 

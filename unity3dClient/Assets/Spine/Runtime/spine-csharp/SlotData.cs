@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -62,7 +62,7 @@ namespace Spine {
 		public BlendMode BlendMode { get { return blendMode; } set { blendMode = value; } }
 
 		public SlotData (int index, String name, BoneData boneData) {
-			if (index < 0) throw new ArgumentException ("index must be >= 0.", "index");
+			if (index < 0) throw new ArgumentException("index must be >= 0.", "index");
 			if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
 			if (boneData == null) throw new ArgumentNullException("boneData", "boneData cannot be null.");
 			this.index = index;

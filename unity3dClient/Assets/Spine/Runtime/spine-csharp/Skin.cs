@@ -1,9 +1,8 @@
-
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -109,7 +108,7 @@ namespace Spine {
 		}
 
 		/// <summary>Returns all attachments in this skin for the specified slot index.</summary>
-		/// <param name="slotIndex">The target slotIndex. To find the slot index, use <see cref="Spine.Skeleton.FindSlotIndex"/> or <see cref="Spine.SkeletonData.FindSlotIndex"/>
+		/// <param name="slotIndex">The target slotIndex. To find the slot index, use <see cref="Spine.SkeletonData.FindSlot"/> and <see cref="Spine.SlotData.Index"/>.
 		public void GetAttachments (int slotIndex, List<SkinEntry> attachments) {
 			if (slotIndex < 0) throw new ArgumentException("slotIndex must be >= 0.");
 			if (attachments == null) throw new ArgumentNullException("attachments", "attachments cannot be null.");
@@ -203,4 +202,3 @@ namespace Spine {
 		}
 	}
 }
-

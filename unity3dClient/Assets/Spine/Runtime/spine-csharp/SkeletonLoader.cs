@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -28,8 +28,8 @@
  *****************************************************************************/
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Spine {
 
@@ -77,14 +77,14 @@ namespace Spine {
 			internal string parent, skin;
 			internal int slotIndex;
 			internal MeshAttachment mesh;
-			internal bool inheritDeform;
+			internal bool inheritTimelines;
 
-			public LinkedMesh (MeshAttachment mesh, string skin, int slotIndex, string parent, bool inheritDeform) {
+			public LinkedMesh (MeshAttachment mesh, string skin, int slotIndex, string parent, bool inheritTimelines) {
 				this.mesh = mesh;
 				this.skin = skin;
 				this.slotIndex = slotIndex;
 				this.parent = parent;
-				this.inheritDeform = inheritDeform;
+				this.inheritTimelines = inheritTimelines;
 			}
 		}
 

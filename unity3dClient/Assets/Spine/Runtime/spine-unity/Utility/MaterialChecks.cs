@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -123,8 +123,7 @@ namespace Spine.Unity {
 			return isProblematic;
 		}
 
-		public static bool IsMaterialSetupProblematic(SkeletonGraphic skeletonGraphic, ref string errorMessage)
-		{
+		public static bool IsMaterialSetupProblematic (SkeletonGraphic skeletonGraphic, ref string errorMessage) {
 			var material = skeletonGraphic.material;
 			bool isProblematic = false;
 			if (material) {
@@ -157,11 +156,11 @@ namespace Spine.Unity {
 			return isProblematic;
 		}
 
-		public static bool IsMaterialSetupProblematic(Material material, ref string errorMessage) {
+		public static bool IsMaterialSetupProblematic (Material material, ref string errorMessage) {
 			return !IsColorSpaceSupported(material, ref errorMessage);
 		}
 
-		public static bool IsZSpacingRequired(Material material, ref string errorMessage) {
+		public static bool IsZSpacingRequired (Material material, ref string errorMessage) {
 			bool hasForwardAddPass = material.FindPass("FORWARD_DELTA") >= 0;
 			if (hasForwardAddPass) {
 				errorMessage += kZSpacingRequiredMessage;
@@ -222,8 +221,7 @@ namespace Spine.Unity {
 						"(You can disable this warning in `Edit - Preferences - Spine`)\n", texturePath, materialName);
 					isProblematic = true;
 				}
-			}
-			else { // straight alpha texture
+			} else { // straight alpha texture
 				if (!alphaIsTransparency) {
 					string materialName = System.IO.Path.GetFileName(materialPath);
 					errorMessage += string.Format("`{0}` and material `{1}` : Incorrect" +
@@ -245,14 +243,12 @@ namespace Spine.Unity {
 					material.DisableKeyword(STRAIGHT_ALPHA_KEYWORD);
 				else
 					material.EnableKeyword(STRAIGHT_ALPHA_KEYWORD);
-			}
-			else {
+			} else {
 				if (enablePMATexture) {
 					material.DisableKeyword(ALPHAPREMULTIPLY_ON_KEYWORD);
 					material.DisableKeyword(ALPHABLEND_ON_KEYWORD);
 					material.EnableKeyword(ALPHAPREMULTIPLY_VERTEX_ONLY_ON_KEYWORD);
-				}
-				else {
+				} else {
 					material.DisableKeyword(ALPHAPREMULTIPLY_ON_KEYWORD);
 					material.DisableKeyword(ALPHAPREMULTIPLY_VERTEX_ONLY_ON_KEYWORD);
 					material.EnableKeyword(ALPHABLEND_ON_KEYWORD);
@@ -260,7 +256,7 @@ namespace Spine.Unity {
 			}
 		}
 
-		static bool IsPMATextureMaterial (Material material) {
+		public static bool IsPMATextureMaterial (Material material) {
 			bool usesAlphaPremultiplyKeyword = IsSpriteShader(material);
 			if (usesAlphaPremultiplyKeyword)
 				return material.IsKeywordEnabled(ALPHAPREMULTIPLY_ON_KEYWORD);
@@ -293,16 +289,23 @@ namespace Spine.Unity {
 					break;
 				}
 			}
-			bool isShaderWithMeshNormals = IsSpriteShader(material);
+			bool isShaderWithMeshNormals = IsLitSpriteShader(material);
 			return isShaderWithMeshNormals && !anyFixedNormalSet;
 		}
 
-		static bool IsSpriteShader (Material material) {
+		static bool IsLitSpriteShader (Material material) {
 			string shaderName = material.shader.name;
 			return shaderName.Contains("Spine/Sprite/Pixel Lit") ||
 				shaderName.Contains("Spine/Sprite/Vertex Lit") ||
 				shaderName.Contains("2D/Spine/Sprite") || // covers both URP and LWRP
 				shaderName.Contains("Pipeline/Spine/Sprite"); // covers both URP and LWRP
+		}
+
+		static bool IsSpriteShader (Material material) {
+			if (IsLitSpriteShader(material))
+				return true;
+			string shaderName = material.shader.name;
+			return shaderName.Contains("Spine/Sprite/Unlit");
 		}
 
 		static bool RequiresTintBlack (Material material) {

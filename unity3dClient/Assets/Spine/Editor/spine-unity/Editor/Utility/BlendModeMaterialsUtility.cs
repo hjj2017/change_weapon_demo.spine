@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -30,11 +30,11 @@
 // from spine-unity 4.0 onward BlendModeMaterialAssets are obsolete and shall be upgraded.
 #define UPGRADE_ALL_BLEND_MODE_MATERIALS
 
-using UnityEngine;
-using UnityEditor;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace Spine.Unity.Editor {
 
@@ -82,11 +82,9 @@ namespace Spine.Unity.Editor {
 					TransferSettingsFromModifierAsset(blendModesModifierAsset,
 					skeletonDataAsset, templateMaterials);
 					UpdateBlendmodeMaterialsRequiredState(skeletonDataAsset, skeletonData);
-				}
-				else
+				} else
 					return;
-			}
-			else {
+			} else {
 				if (!UpdateBlendmodeMaterialsRequiredState(skeletonDataAsset, skeletonData))
 					return;
 				AssignPreferencesTemplateMaterials(templateMaterials);
@@ -98,7 +96,7 @@ namespace Spine.Unity.Editor {
 				}
 			}
 
-			skeletonDataAsset.Clear();
+			SpineEditorUtilities.ClearSkeletonDataAsset(skeletonDataAsset);
 			skeletonData = skeletonDataAsset.GetSkeletonData(true);
 			if (anyMaterialsChanged)
 				ReloadSceneSkeletons(skeletonDataAsset);
@@ -112,8 +110,7 @@ namespace Spine.Unity.Editor {
 			if (!skeletonDataAsset.blendModeMaterials.applyAdditiveMaterial) {
 				anyMaterialsChanged |= skeletonDataAsset.blendModeMaterials.additiveMaterials.Count > 0;
 				skeletonDataAsset.blendModeMaterials.additiveMaterials.Clear();
-			}
-			else
+			} else
 				anyMaterialsChanged |= skeletonDataAsset.blendModeMaterials.additiveMaterials.RemoveAll(ifMaterialMissing) != 0;
 			anyMaterialsChanged |= skeletonDataAsset.blendModeMaterials.multiplyMaterials.RemoveAll(ifMaterialMissing) != 0;
 			anyMaterialsChanged |= skeletonDataAsset.blendModeMaterials.screenMaterials.RemoveAll(ifMaterialMissing) != 0;
@@ -146,7 +143,7 @@ namespace Spine.Unity.Editor {
 			SkeletonDataAsset skeletonDataAsset) {
 
 			skeletonDataAsset.skeletonDataModifiers.Remove(modifierAsset);
-			Debug.Log(string.Format("BlendModeMaterialsAsset upgraded to built-in BlendModeMaterials at SkeletonDataAsset '{0}'.",
+			Debug.Log(string.Format("BlendModeMaterialsAsset upgraded to built-in BlendModeMaterials at SkeletonData asset '{0}'.",
 				skeletonDataAsset.name), skeletonDataAsset);
 			EditorUtility.SetDirty(skeletonDataAsset);
 		}
@@ -167,7 +164,7 @@ namespace Spine.Unity.Editor {
 
 			var skinEntries = new List<Skin.SkinEntry>();
 
-			skeletonDataAsset.Clear();
+			SpineEditorUtilities.ClearSkeletonDataAsset(skeletonDataAsset);
 			skeletonDataAsset.isUpgradingBlendModeMaterials = true;
 			SkeletonData skeletonData = skeletonDataAsset.GetSkeletonData(true);
 
@@ -181,21 +178,21 @@ namespace Spine.Unity.Editor {
 				Material materialTemplate = null;
 				string materialSuffix = null;
 				switch (slot.BlendMode) {
-					case BlendMode.Multiply:
-						replacementMaterials = blendModeMaterials.multiplyMaterials;
-						materialTemplate = templateMaterials.multiplyTemplate;
-						materialSuffix = MATERIAL_SUFFIX_MULTIPLY;
-						break;
-					case BlendMode.Screen:
-						replacementMaterials = blendModeMaterials.screenMaterials;
-						materialTemplate = templateMaterials.screenTemplate;
-						materialSuffix = MATERIAL_SUFFIX_SCREEN;
-						break;
-					case BlendMode.Additive:
-						replacementMaterials = blendModeMaterials.additiveMaterials;
-						materialTemplate = templateMaterials.additiveTemplate;
-						materialSuffix = MATERIAL_SUFFIX_ADDITIVE;
-						break;
+				case BlendMode.Multiply:
+					replacementMaterials = blendModeMaterials.multiplyMaterials;
+					materialTemplate = templateMaterials.multiplyTemplate;
+					materialSuffix = MATERIAL_SUFFIX_MULTIPLY;
+					break;
+				case BlendMode.Screen:
+					replacementMaterials = blendModeMaterials.screenMaterials;
+					materialTemplate = templateMaterials.screenTemplate;
+					materialSuffix = MATERIAL_SUFFIX_SCREEN;
+					break;
+				case BlendMode.Additive:
+					replacementMaterials = blendModeMaterials.additiveMaterials;
+					materialTemplate = templateMaterials.additiveTemplate;
+					materialSuffix = MATERIAL_SUFFIX_ADDITIVE;
+					break;
 				}
 
 				skinEntries.Clear();
@@ -203,9 +200,14 @@ namespace Spine.Unity.Editor {
 					skin.GetAttachments(slotIndex, skinEntries);
 
 				foreach (var entry in skinEntries) {
-					var renderableAttachment = entry.Attachment as IHasRendererObject;
+					var renderableAttachment = entry.Attachment as IHasTextureRegion;
 					if (renderableAttachment != null) {
-						var originalRegion = (AtlasRegion)renderableAttachment.RendererObject;
+						var originalRegion = (AtlasRegion)renderableAttachment.Region;
+						Sequence sequence = null;
+						if (originalRegion == null && (sequence = renderableAttachment.Sequence) != null) {
+							if (sequence.Regions != null && sequence.Regions.Length > 0)
+								originalRegion = (AtlasRegion)sequence.Regions[0];
+						}
 						bool replacementExists = replacementMaterials.Exists(
 							replacement => replacement.pageName == originalRegion.page.name);
 						if (!replacementExists) {
@@ -215,12 +217,11 @@ namespace Spine.Unity.Editor {
 								replacementMaterials.Add(replacement);
 								anyReplacementMaterialsChanged = true;
 								if (createdNewMaterial) {
-									Debug.Log(string.Format("Created blend mode Material '{0}' for SkeletonDataAsset '{1}'.",
+									Debug.Log(string.Format("Created blend mode Material '{0}' for SkeletonData asset '{1}'.",
 										replacement.material.name, skeletonDataAsset), replacement.material);
 								}
-							}
-							else {
-								Debug.LogError(string.Format("Failed creating blend mode Material for SkeletonDataAsset '{0}',"+
+							} else {
+								Debug.LogError(string.Format("Failed creating blend mode Material for SkeletonData asset '{0}'," +
 									" atlas page '{1}', template '{2}'.",
 									skeletonDataAsset.name, originalRegion.page.name, materialTemplate.name),
 									skeletonDataAsset);
@@ -236,7 +237,7 @@ namespace Spine.Unity.Editor {
 			return !anyCreationFailed;
 		}
 
-		protected static string GetBlendModeMaterialPath(AtlasPage originalPage, string materialSuffix) {
+		protected static string GetBlendModeMaterialPath (AtlasPage originalPage, string materialSuffix) {
 			var originalMaterial = originalPage.rendererObject as Material;
 			var originalPath = AssetDatabase.GetAssetPath(originalMaterial);
 			return originalPath.Replace(".mat", materialSuffix + ".mat");
@@ -254,8 +255,7 @@ namespace Spine.Unity.Editor {
 			newReplacement.pageName = originalPage.name;
 			if (File.Exists(blendMaterialPath)) {
 				newReplacement.material = AssetDatabase.LoadAssetAtPath<Material>(blendMaterialPath);
-			}
-			else {
+			} else {
 				var blendModeMaterial = new Material(materialTemplate) {
 					name = originalMaterial.name + " " + materialTemplate.name,
 					mainTexture = originalMaterial.mainTexture
