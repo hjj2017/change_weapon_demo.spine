@@ -179,7 +179,7 @@ MonoBehaviour:
   disableRenderingOnOverride: 1
   updateTiming: 1
   unscaledTime: 0
-  _animationName: Run
+  _animationName: Attk/Attk_4
   loop: 1
   timeScale: 1
 --- !u!23 &144997354
