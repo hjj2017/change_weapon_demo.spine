@@ -30,7 +30,7 @@ public class DemoScene : MonoBehaviour
         RegionAttachment rWeapon = atlasReg.ToRegionAttachment(atlasReg.name);
 
         // 获取主角的 Spine 骨骼动画
-        SkeletonAnimation spAnim = GameObject.Find("/Character_1002_").GetComponent<SkeletonAnimation>();
+        SkeletonAnimation spAnim = GameObject.Find("/Character_X_").GetComponent<SkeletonAnimation>();
         // 查找右手武器插槽, 并替换其中的附件
         spAnim.Skeleton.FindSlot("Slot_RWeapon").Attachment = rWeapon;
 
@@ -51,7 +51,7 @@ public class DemoScene : MonoBehaviour
         Skin weaponeSkin = new Skin("NewWeapon");
         weaponeSkin.SetAttachment(2048, "X", rWeapon);
 
-        Skin defaultSkin = spAnim.Skeleton.Data.FindSkin("default");
+        Skin defaultSkin = spAnim.Skeleton.Data.FindSkin("_Default");
 
         Skin newSkin = new Skin("Mixed");
         newSkin.AddSkin(weaponeSkin);
